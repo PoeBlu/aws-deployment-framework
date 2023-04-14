@@ -68,14 +68,16 @@ class IAM:
         """
         _policy = self._get_policy()
         for statement in _policy.get('Statement', None):
-            if statement['Sid'] == 'S3':
-                if "arn:aws:s3:::{0}".format(
-                        bucket_name) not in statement['Resource']:
-                    LOGGER.info('Updating Role %s to access %s', self.role_name, bucket_name)
-                    statement['Resource'].append(
-                        "arn:aws:s3:::{0}".format(bucket_name))
-                    statement['Resource'].append(
-                        "arn:aws:s3:::{0}/*".format(bucket_name))
+            if (
+                statement['Sid'] == 'S3'
+                and "arn:aws:s3:::{0}".format(bucket_name)
+                not in statement['Resource']
+            ):
+                LOGGER.info('Updating Role %s to access %s', self.role_name, bucket_name)
+                statement['Resource'].append(
+                    "arn:aws:s3:::{0}".format(bucket_name))
+                statement['Resource'].append(
+                    "arn:aws:s3:::{0}/*".format(bucket_name))
 
         self._set_policy(_policy)
 
@@ -87,13 +89,13 @@ class IAM:
         _policy = self._get_policy()
 
         for statement in _policy.get('Statement', None):
-            if statement['Sid'] == 'KMS':
-                if kms_key_arn not in statement['Resource']:
-                    LOGGER.info('Updating Role %s to be to access %s', self.role_name, kms_key_arn)
-                    try:
-                        statement['Resource'].append(kms_key_arn)
-                    except AttributeError:
-                        statement['Resource'] = [statement['Resource']]
-                        statement['Resource'].append(kms_key_arn)
-
+            if (
+                statement['Sid'] == 'KMS'
+                and kms_key_arn not in statement['Resource']
+            ):
+                LOGGER.info('Updating Role %s to be to access %s', self.role_name, kms_key_arn)
+                try:
+                    statement['Resource'].append(kms_key_arn)
+                except AttributeError:
+                    statement['Resource'] = [statement['Resource'], kms_key_arn]
         self._set_policy(_policy)

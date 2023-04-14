@@ -64,8 +64,7 @@ class DeploymentMap:
             self.map_contents['pipelines'].extend(deployment_map['pipelines'])
 
     def _get_all(self):
-        self.map_contents = {}
-        self.map_contents['pipelines'] = []
+        self.map_contents = {'pipelines': []}
         if os.path.isdir(self.map_dir_path):
             for file in os.listdir(self.map_dir_path):
                 if file.endswith(".yml") and file != 'example-deployment_map.yml':

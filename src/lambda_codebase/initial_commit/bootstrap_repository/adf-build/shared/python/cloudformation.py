@@ -232,7 +232,6 @@ class CloudFormation(StackProperties):
             LOGGER.info(
                 '%s - Attempted to Update Stack Termination Protection: %s, It is not required.',
                 self.account_id, self.stack_name, )
-            pass
 
     def _delete_change_set(self):
         try:
@@ -244,7 +243,6 @@ class CloudFormation(StackProperties):
             LOGGER.info(
                 '%s - Attempted to Delete Stack: %s, it did not exist.',
                 self.account_id, self.stack_name)
-            pass
 
     def _execute_change_set(self, waiter):
         LOGGER.info(
@@ -261,8 +259,7 @@ class CloudFormation(StackProperties):
 
     def create_stack(self):
         waiter = self._get_waiter_type()
-        create_change_set = self._create_change_set()
-        if create_change_set:
+        if create_change_set := self._create_change_set():
             self._execute_change_set(waiter)
             self._update_stack_termination_protection()
 
@@ -274,16 +271,16 @@ class CloudFormation(StackProperties):
 
     def delete_all_base_stacks(self):
         for stack in paginator(self.client.list_stacks):
-            if bool(
-                    re.search(
-                        'adf-(global|regional)-base',
-                        stack.get('StackName'))):
-                if stack.get(
-                        'StackStatus') in StackProperties.clean_stack_status:
-                    LOGGER.warning(
-                        'Removing Stack: %s',
-                        stack.get('StackName'))
-                    self.delete_stack(stack.get('StackName'))
+            if (
+                bool(
+                    re.search('adf-(global|regional)-base', stack.get('StackName'))
+                )
+                and stack.get('StackStatus') in StackProperties.clean_stack_status
+            ):
+                LOGGER.warning(
+                    'Removing Stack: %s',
+                    stack.get('StackName'))
+                self.delete_stack(stack.get('StackName'))
 
     def get_stack_output(self, value):
         try:

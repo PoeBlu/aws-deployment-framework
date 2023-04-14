@@ -32,32 +32,27 @@ class Pipeline:
 
     def _extract_notification_endpoint(self):
         for parameter in self.parameters:
-            endpoint = parameter.get('NotificationEndpoint')
-            if endpoint:
+            if endpoint := parameter.get('NotificationEndpoint'):
                 return endpoint
         return None
 
 
     def generate_parameters(self):
-        params = []
-        # ProjectName should be a hidden param and passed in directly from the
-        # name of the "pipeline"
-        params.append({
-            'ParameterKey': str('ProjectName'),
-            'ParameterValue': self.name,
-        })
+        params = [{'ParameterKey': 'ProjectName', 'ParameterValue': self.name}]
         for param in self.parameters:
-            for key, value in param.items():
-                params.append({
+            params.extend(
+                {
                     'ParameterKey': str(key),
                     'ParameterValue': str(value),
-                })
+                }
+                for key, value in param.items()
+            )
         return params
 
 
     @staticmethod
     def flatten_list(input_list):
-        result = list()
+        result = []
         for item in input_list:
             if isinstance(item, list):
                 result.extend(Pipeline.flatten_list(item))

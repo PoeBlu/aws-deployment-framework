@@ -298,7 +298,9 @@ def get_files_to_commit(directoryName: str) -> List[FileToCommit]:
     return [
         FileToCommit(
             str(get_relative_name(entry, directoryName)),
-            FileMode.NORMAL if not os.access(entry, os.X_OK) else FileMode.EXECUTABLE,
+            FileMode.EXECUTABLE
+            if os.access(entry, os.X_OK)
+            else FileMode.NORMAL,
             entry.read_bytes(),
         )
         for entry in path.glob("**/*")

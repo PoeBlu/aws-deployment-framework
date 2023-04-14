@@ -24,26 +24,24 @@ class S3:
 
     def build_pathing_style(self, style, key):
         if style == 'path':
-            if self.region == 'us-east-1':
-                return "https://s3.amazonaws.com/{bucket}/{key}".format(
-                    bucket=self.bucket,
-                    key=key
+            return (
+                "https://s3.amazonaws.com/{bucket}/{key}".format(
+                    bucket=self.bucket, key=key
                 )
-            return "https://s3-{region}.amazonaws.com/{bucket}/{key}".format(
-                region=self.region,
-                bucket=self.bucket,
-                key=key
+                if self.region == 'us-east-1'
+                else "https://s3-{region}.amazonaws.com/{bucket}/{key}".format(
+                    region=self.region, bucket=self.bucket, key=key
+                )
             )
-        if style == 'virtual-hosted':
-            if self.region == 'us-east-1':
-                return "http://{bucket}.s3.amazonaws.com/{key}".format(
-                    bucket=self.bucket,
-                    key=key
+        elif style == 'virtual-hosted':
+            return (
+                "http://{bucket}.s3.amazonaws.com/{key}".format(
+                    bucket=self.bucket, key=key
                 )
-            return "http://{bucket}.s3-{region}.amazonaws.com/{key}".format(
-                region=self.region,
-                bucket=self.bucket,
-                key=key
+                if self.region == 'us-east-1'
+                else "http://{bucket}.s3-{region}.amazonaws.com/{key}".format(
+                    region=self.region, bucket=self.bucket, key=key
+                )
             )
         raise Exception("Unknown upload style syntax, path or virtual-hosted must be specified.")
 

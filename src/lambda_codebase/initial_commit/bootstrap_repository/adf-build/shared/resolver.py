@@ -66,25 +66,20 @@ class Resolver:
             if not optional:
                 raise
             stack_output = ""
-            pass
         try:
             parent_key = list(Resolver.determine_parent_key(self.comparison_parameters, key))[0]
-            if optional:
-                self.stage_parameters[parent_key][key] = stack_output
-            else:
-                if not stack_output:
-                    raise Exception("No Stack Output found on %s in %s with stack name %s and output key %s" % account_id, region, stack_name, export)
-                self.stage_parameters[parent_key][key] = stack_output
+            if not optional and not stack_output:
+                raise Exception("No Stack Output found on %s in %s with stack name %s and output key %s" % account_id, region, stack_name, export)
+            self.stage_parameters[parent_key][key] = stack_output
         except IndexError:
-            if stack_output:
-                if self.stage_parameters.get(key):
-                    self.stage_parameters[key] = stack_output
-            else:
+            if not stack_output:
                 raise Exception("Could not determine the structure of the file in order to import from CloudFormation")
+            if self.stage_parameters.get(key):
+                self.stage_parameters[key] = stack_output
         return True
 
     def upload(self, value, key, file_name):
-        if not any(item in value for item in ['path', 'virtual-hosted']):
+        if all(item not in value for item in ['path', 'virtual-hosted']):
             raise Exception(
                 'When uploading to S3 you need to specify a '
                 'pathing style for the response either path or virtual-hosted, '
@@ -123,8 +118,7 @@ class Resolver:
             if key == target_key:
                 yield parent_key
             if isinstance(value, dict):
-                for result in Resolver.determine_parent_key(value, target_key, key):
-                    yield result
+                yield from Resolver.determine_parent_key(value, target_key, key)
 
     def fetch_parameter_store_value(self, value, key, optional=False): # pylint: disable=too-many-statements
         if self._is_optional(value):
@@ -140,11 +134,10 @@ class Resolver:
         try:
             parameter = self.cache.check('{0}/{1}'.format(region, value)) or client.fetch_parameter(value)
         except ParameterNotFoundError:
-            if optional:
-                LOGGER.info("Parameter %s not found, returning empty string", value)
-                parameter = ""
-            else:
+            if not optional:
                 raise
+            LOGGER.info("Parameter %s not found, returning empty string", value)
+            parameter = ""
         try:
             parent_key = list(Resolver.determine_parent_key(self.comparison_parameters, key))[0]
             if parameter:

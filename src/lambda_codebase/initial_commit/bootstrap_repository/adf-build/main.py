@@ -173,8 +173,7 @@ def worker_thread(
     )
     ou_id = organizations.get_parent_info().get("ou_parent_id")
 
-    account_state = is_account_in_invalid_state(ou_id, config.config)
-    if account_state:
+    if account_state := is_account_in_invalid_state(ou_id, config.config):
         LOGGER.info("%s %s", account_id, account_state)
         return
 

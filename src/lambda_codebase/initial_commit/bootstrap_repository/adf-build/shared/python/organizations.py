@@ -123,7 +123,7 @@ class Organizations: # pylint: disable=R0904
 
     def get_account_ids(self):
         for account in paginator(self.client.list_accounts):
-            if not account.get('Status') == 'ACTIVE':
+            if account.get('Status') != 'ACTIVE':
                 LOGGER.warning('Account %s is not an Active AWS Account', account['Id'])
                 continue
             self.account_ids.append(account['Id'])
@@ -188,8 +188,7 @@ class Organizations: # pylint: disable=R0904
                 raise Exception(
                     "Path {0} failed to return a child OU at '{1}'".format(
                         path, p[0]))
-        else: # pylint: disable=W0120
-            return self.get_accounts_for_parent(ou_id)
+        return self.get_accounts_for_parent(ou_id)
 
     def build_account_path(self, ou_id, account_path, cache):
         """Builds a path tree to the account from the root of the Organization

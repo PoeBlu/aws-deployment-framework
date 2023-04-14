@@ -13,8 +13,4 @@ from s3 import S3
 
 @fixture
 def cls():
-    cls = S3(
-        'us-east-1',
-        'some_bucket'
-    )
-    return cls
+    return S3('us-east-1', 'some_bucket')

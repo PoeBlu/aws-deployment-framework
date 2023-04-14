@@ -19,15 +19,14 @@ class MockTargetStructure:
 
 @fixture
 def cls():
-    cls = Target(
+    return Target(
         path='/thing/path',
         regions=['region1', 'region2'],
         target_structure=MockTargetStructure(),
         organizations=None,
         step_name=None,
-        params={}
+        params={},
     )
-    return cls
 
 
 def test_target_is_approval(cls):

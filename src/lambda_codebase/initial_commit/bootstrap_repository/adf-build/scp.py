@@ -18,7 +18,7 @@ class SCP:
 
     @staticmethod
     def _find_all():
-        return [scp for scp in glob.iglob('./**/scp.json', recursive=True)]
+        return list(glob.iglob('./**/scp.json', recursive=True))
 
     def _compare_ordered_policy(self, obj):
         if isinstance(obj, dict):
@@ -62,7 +62,6 @@ class SCP:
                             organizations.attach_scp('p-FullAWSAccess', organization_mapping[path])
                         except organizations.client.exceptions.DuplicatePolicyAttachmentException:
                             LOGGER.info('FullAWSAccess will stay attached since keep-default-scp is enabled. Path is: %s', path)
-                            pass
                 if stored_scp not in scps:
                     scp_id = organizations.describe_scp_id_for_target(organization_mapping[path])
                     try:
@@ -74,8 +73,6 @@ class SCP:
                     LOGGER.info('SCP %s will be deleted. Path is: %s', organization_mapping[path], path)
         except ParameterNotFoundError:
             LOGGER.debug('Parameter "scp" was not found in Parameter Store, continuing.')
-            pass
-
         for scp in scps:
             path = SCP._trim_scp_file_name(scp)
             scp_id = organizations.describe_scp_id_for_target(organization_mapping[path])

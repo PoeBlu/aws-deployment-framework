@@ -88,14 +88,10 @@ def upload_pipeline(s3, pipeline):
     and returning the URL that can be referenced in the CloudFormation
     create_stack call.
     """
-    s3_object_path = s3.put_object(
-        "pipelines/{0}/global.yml".format(
-            pipeline.name), "{0}/{1}/global.yml".format(
-                'pipelines',
-                pipeline.name
-            )
-        )
-    return s3_object_path
+    return s3.put_object(
+        "pipelines/{0}/global.yml".format(pipeline.name),
+        "{0}/{1}/global.yml".format('pipelines', pipeline.name),
+    )
 
 def worker_thread(p, organizations, auto_create_repositories, s3, deployment_map, parameter_store):
     pipeline = Pipeline(p)

@@ -105,8 +105,6 @@ def ensure_org_unit(parent_id: str, org_unit_name: str) -> Tuple[OrgUnitId, Crea
         return org_unit_id, True
     except ORGANIZATION_CLIENT.exceptions.DuplicateOrganizationalUnitException:
         LOGGER.info("deployment OU already exists")
-        pass
-
     params: dict = {"ParentId": parent_id}
     while True:
         org_units = ORGANIZATION_CLIENT.list_organizational_units_for_parent(**params)
@@ -116,6 +114,6 @@ def ensure_org_unit(parent_id: str, org_unit_name: str) -> Tuple[OrgUnitId, Crea
             org_unit_id = org_unit["Id"]
             LOGGER.info("OU already exists: %s", org_unit_id)
             return org_unit_id, False
-        if not "NextToken" in org_units:
+        if "NextToken" not in org_units:
             raise Exception("Unable to find OU")
         params["NextToken"] = org_units["NextToken"]
